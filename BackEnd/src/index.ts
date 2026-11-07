@@ -19,23 +19,31 @@ interface IProdutos {
 let produts: IProdutos[] = [];
 
 app.get('/produtos', (req: Request, res: Response) => {
+    const { estado } = req.query;
+
+    if (estado) {
+        const filtrados = produts.filter( produto => produto.state === estado);
+        return res.json(filtrados);
+    }
+
     produts.push(
-        { 
-            id: 1, 
+        {
+            id: 1,
             name: 'Product 1',
             state: State.MG
         },
-        { 
-            id: 2, 
+        {
+            id: 2,
             name: 'Product 2',
             state: State.SP
         },
-        { 
-            id: 3, 
+        {
+            id: 3,
             name: 'Product 3',
             state: State.RJ
         }
     );
+
     return res.json(produts);
 });
 
