@@ -11,9 +11,7 @@ export const Header: React.FC<HeaderProps> = ({ isApiConnected }) => {
         <div className="flex items-center space-x-6">
 
           <h1 className="text-xl font-bold">RegionalExpress - Painel de Controle</h1>
-          {/* Divisória Vertical */}
           <div className="h-6 w-px bg-slate-800 hidden sm:block" />
-          {/* Badge de Status da API Backend */}
           <div className="hidden sm:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700/50">
             <span
               className={`w-2.5 h-2.5 rounded-full animate-pulse ${

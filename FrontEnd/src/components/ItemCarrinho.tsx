@@ -16,7 +16,7 @@ export const ItemCarrinho: React.FC<CarrinhoProps> = ({ productName, amount, pri
                 {productName}
             </span>
             <span className="cols-span-1 justify-self-center self-center">
-                <button onClick={()=>setQtdAmount(qtdAmount - 1)} type="button" className="px-3 m-3 border rounded-xl">-</button>
+                <button onClick={()=>setQtdAmount(qtdAmount <= 1 ? 1 : qtdAmount - 1)} type="button" className="px-3 m-3 border rounded-xl">-</button>
                 {qtdAmount}
                 <button onClick={()=>setQtdAmount(qtdAmount + 1)} type="button" className="px-3 m-3 border rounded-xl">+</button>
             </span>
