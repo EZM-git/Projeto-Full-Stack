@@ -1,34 +1,56 @@
-import React from "react";
+import type { CartItem } from "../types";
 
-interface CarrinhoProps{
-    productName: string,
-    amount: number, 
-    priceByAmount: number,
-    description: string
+interface ItemCarrinhoProps {
+    item: CartItem;
+    onQuantityChange: (productId: number, quantity: number) => void;
+    onRemove: (productId: number) => void;
 }
 
-export const ItemCarrinho: React.FC<CarrinhoProps> = ({ productName, amount, priceByAmount, description="" }) => {
-    const [qtdAmount, setQtdAmount] = React.useState(amount)
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+});
+
+export function ItemCarrinho({ item, onQuantityChange, onRemove }: ItemCarrinhoProps) {
+    const unitPrice = item.unitPrice === null ? "Não informado" : currencyFormatter.format(item.unitPrice);
+    const total = item.unitPrice === null ? "Não informado" : currencyFormatter.format(item.unitPrice * item.quantity);
 
     return (
-        <div className="grid grid-cols-5 text-black text-2xl border">
-            <span className="cols-span-1 justify-self-center self-center">
-                {productName}
-            </span>
-            <span className="cols-span-1 justify-self-center self-center">
-                <button onClick={()=>setQtdAmount(qtdAmount <= 1 ? 1 : qtdAmount - 1)} type="button" className="px-3 m-3 border rounded-xl">-</button>
-                {qtdAmount}
-                <button onClick={()=>setQtdAmount(qtdAmount + 1)} type="button" className="px-3 m-3 border rounded-xl">+</button>
-            </span>
-            <span className="cols-span-1 justify-self-center self-center">
-                R$ {(priceByAmount).toFixed(2)}
-            </span>
-            <span className="cols-span-1 justify-self-center self-center">
-                {description}
-            </span>
-            <span className="cols-span-1 justify-self-center self-center">
-                R$ {(priceByAmount*qtdAmount).toFixed(2)}
-            </span>
-        </div>
+        <tr className="border-t text-sm sm:text-base">
+            <th scope="row" className="p-3 text-left font-medium">
+            {item.name}
+            </th>
+        <td className="whitespace-nowrap p-3 text-center">
+            <button
+                type="button"
+                onClick={() =>
+                    onQuantityChange(item.productId, Math.max(1, item.quantity - 1))
+                }
+                className="mx-2 rounded border px-3 py-1 hover:bg-slate-100"
+                aria-label={`Diminuir quantidade de ${item.name}`}
+                disabled={item.quantity <= 1}
+            >-</button>
+
+            <span aria-label={`Quantidade: ${item.quantity}`}>{item.quantity}</span>
+
+            <button
+                type="button"
+                onClick={() => onQuantityChange(item.productId, item.quantity + 1)}
+                className="mx-2 rounded border px-3 py-1 hover:bg-slate-100"
+                aria-label={`Aumentar quantidade de ${item.name}`}
+            >+</button>
+        </td>
+
+        <td className="whitespace-nowrap p-3 text-right">{unitPrice}</td>
+        <td className="whitespace-nowrap p-3 text-right">{total}</td>
+        <td className="p-3 text-right">
+        <button
+            type="button"
+            onClick={() => onRemove(item.productId)}
+            className="text-red-700 underline hover:text-red-900"
+            aria-label={`Remover ${item.name} do carrinho`}
+        >Remover</button>
+        </td>
+        </tr>
     );
 }

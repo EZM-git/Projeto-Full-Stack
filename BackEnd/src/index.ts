@@ -18,7 +18,7 @@ interface IProdutos {
 
 let produts: IProdutos[] = [];
 
-app.get('/produtos', (req: Request, res: Response) => {
+app.get( "/produtos" , (req: Request, res: Response) => {
     const { estado } = req.query;
 
     if (estado) {
