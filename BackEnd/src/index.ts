@@ -4,16 +4,11 @@ import cors from 'cors';
 const app = express();
 app.use(cors());
 
-enum State {
-    MG = 'Minas Gerais',
-    SP = 'São Paulo',
-    RJ = 'Rio de Janeiro'
-}
 
 interface IProdutos {
     id: number;
     name: string;
-    state: State;
+    price: number
 }
 
 let produts: IProdutos[] = [];
@@ -21,26 +16,21 @@ let produts: IProdutos[] = [];
 app.get( "/produtos" , (req: Request, res: Response) => {
     const { estado } = req.query;
 
-    if (estado) {
-        const filtrados = produts.filter( produto => produto.state === estado);
-        return res.json(filtrados);
-    }
-
     produts.push(
         {
             id: 1,
             name: 'Product 1',
-            state: State.MG
+            price: 2.5
         },
         {
             id: 2,
             name: 'Product 2',
-            state: State.SP
+            price: 2.5
         },
         {
             id: 3,
             name: 'Product 3',
-            state: State.RJ
+            price: 2.5
         }
     );
 

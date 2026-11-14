@@ -17,7 +17,6 @@ export async function fetchProducts(signal?: AbortSignal): Promise<Product[]> {
       !isRecord(item) ||
       typeof item.id !== "number" ||
       typeof item.name !== "string" ||
-      typeof item.state !== "string" ||
       ("price" in item &&
         (typeof item.price !== "number" ||
           !Number.isFinite(item.price) ||
@@ -29,7 +28,6 @@ export async function fetchProducts(signal?: AbortSignal): Promise<Product[]> {
     return {
       id: item.id,
       name: item.name,
-      state: item.state,
       ...(typeof item.price === "number" ? { price: item.price } : {}),
     };
   });
