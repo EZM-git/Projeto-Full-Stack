@@ -5,6 +5,7 @@ import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { fetchProducts } from "./services/products";
 import type { ApiStatus, CartItem, Product } from "./types";
+import api from "./services/api"
 
 type CartAction =
   | { type: "productAdded"; product: Product }
@@ -49,12 +50,56 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
   }
 }
 
+type PendingConfirmation =
+  | { type: "none" }
+  | { type: "newSell" }
+  | { type: "applyDiscount"; discountValue: number };
+
+const [confirmation, setConfirmation] = useState<PendingConfirmation>({ type: "none" });
+const isWithBlur = confirmation.type !== "none";
+
+function handleConfirm() {
+  switch (confirmation.type) {
+    case "newSell":
+      dispatch({ type: "cartCleared" });
+      break;
+    case "deleteItem":
+      dispatch({ type: "itemRemoved", productId: confirmation.productId });
+      break;
+    case "applyDiscount":
+      break;
+  }
+  
+  setConfirmation({ type: "none" });
+}
+function handleCancel() {
+  setConfirmation({ type: "none" });
+}
+
+<button onClick={() => setConfirmation({ type: "newSell" })}>
+  Nova Venda
+</button>
+
+// Para excluir um item específico (exemplo futuro):
+<button onClick={() => setConfirmation({ type: "deleteItem", productId: 42 })}>
+  Remover Item
+</button>
+
+// No seu Modal/Aviso com Blur:
+{isWithBlur && (
+  <ModalConfirmacao 
+    onConfirm={handleConfirm} 
+    onCancel={handleCancel} 
+  />
+)}
+
 function App() {
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
   const [products, setProducts] = useState<Product[]>([]);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [cartItems, dispatch] = useReducer(cartReducer, []);
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [isWithBlur, setIsWithBlur] = useState<boolean>(false);
 
   function retryProducts() {
     setApiStatus("checking");
@@ -62,10 +107,23 @@ function App() {
     setLoadAttempt((attempt) => attempt + 1);
   }
 
+  function handleNewSell() {
+    setIsWithBlur(true)
+  }
+
+  function confirmNewSell() {
+    dispatch({ type: "cartCleared" }); 
+    setIsWithBlur(false);
+  }
+
+  function cancelNewSell() {
+    setIsWithBlur(false);
+  }
+
   useEffect(() => {
+    // IA
     const controller = new AbortController();
 
-    // IA
     fetchProducts(controller.signal)
       .then((loadedProducts) => {
         setProducts(loadedProducts);
@@ -119,7 +177,40 @@ function App() {
         />
         <Extrato itemCount={itemCount} subtotal={subtotal} />
       </main>
-      <Footer />
+      <Footer handleNewSell={handleNewSell} handleEndSell={handleNewSell}/>
+      {isWithBlur && (
+          <div
+            onClick={cancelNewSell}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()} // Impede fechar ao clicar dentro da caixinha
+              className="w-full max-w-sm rounded-xl border border-slate-800 bg-slate-900 p-6 text-center shadow-2xl mx-4"
+            >
+              <h2 className="mb-2 text-lg font-bold text-white">
+                Iniciar nova venda?
+              </h2>
+              <p className="mb-6 text-sm text-slate-400">
+                Todos os itens atuais do carrinho serão removidos.
+              </p>
+
+              <div className="flex justify-center gap-3">
+                <button
+                  onClick={cancelNewSell}
+                  className="flex-1 rounded-lg bg-rose-500 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-rose-700 transition"
+                >
+                  Não
+                </button>
+                <button
+                  onClick={confirmNewSell}
+                  className="flex-1 rounded-lg bg-emerald-400 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-600 transition"
+                >
+                  Sim
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 }
