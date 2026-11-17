@@ -12,3 +12,4 @@ export interface CartItem {
 }
 
 export type ApiStatus = "checking" | "connected" | "disconnected";
+

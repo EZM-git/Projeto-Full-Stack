@@ -1,4 +1,3 @@
-// src/reducers/cartReducer.ts
 import type { CartItem, Product } from "../types";
 
 export type CartAction =
@@ -10,43 +9,41 @@ export type CartAction =
 export function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
     switch (action.type) {
         case "productAdded": {
-        const existingItem = state.find(
-            (item) => item.productId === action.product.id,
-        );
-
-        if (existingItem) {
-            return state.map((item) =>
-            item.productId === action.product.id
-                ? { ...item, quantity: item.quantity + 1 }
-                : item,
+            const existingItem = state.find(
+                (item) => item.productId === action.product.id,
             );
-        }
 
-        return [
-            ...state,
-            {
-            productId: action.product.id,
-            name: action.product.name,
-            quantity: 1,
-            unitPrice: action.product.price ?? null,
-            },
-        ];
-        }
+            if (existingItem) {
+                return state.map((item) =>
+                    item.productId === action.product.id ? { ...item, quantity: item.quantity + 1 } : item,
+                );
+            }
+
+            return [
+                ...state,
+                {
+                productId: action.product.id,
+                name: action.product.name,
+                quantity: 1,
+                unitPrice: action.product.price ?? null,
+                },
+            ];
+            }
 
         case "quantityChanged":
-        return state.map((item) =>
-            item.productId === action.productId
-            ? { ...item, quantity: Math.max(1, action.quantity) }
-            : item,
-        );
+            return state.map((item) =>
+                item.productId === action.productId
+                ? { ...item, quantity: Math.max(1, action.quantity) }
+                : item,
+            );
 
         case "itemRemoved":
-        return state.filter((item) => item.productId !== action.productId);
+            return state.filter((item) => item.productId !== action.productId);
 
         case "cartCleared":
-        return [];
+            return [];
 
         default:
-        return state;
+            return state;
     }
 }
