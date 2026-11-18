@@ -5,9 +5,11 @@ import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { fetchProducts } from "./services/products";
 import type { ApiStatus, Product } from "./types";
-import { cartReducer} from "./hooks/cartReducer";
+import { cartReducer } from "./hooks/cartReducer";
 import { Modal } from "./components/Modal";
 import { modalReducer } from "./hooks/modalReducer";
+import { History } from "./components/History";
+import { historyReducer } from "./hooks/historyReducer";
 
 function App() {
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
@@ -18,36 +20,41 @@ function App() {
   const [cartItems, dispatchCartItems] = useReducer(cartReducer, []);
   const [modalState, dispatchModalState] = useReducer(modalReducer, {
     isOpen: false,
-    type: null
-  })
+    type: null,
+  });
+  const [historyState, dispatchHistoryState] = useReducer(
+    historyReducer,
+    false,
+  );
 
   function handleOpenNewSell() {
     dispatchModalState({ type: "openModal", payload: "newSell" });
   }
-
   function handleOpenEndSell() {
-    dispatchModalState({ type: "openModal", payload: "endSell"});
+    dispatchModalState({ type: "openModal", payload: "endSell" });
   }
-
   function handleOpenApplyDiscount() {
-    dispatchModalState({ type: "openModal", payload: "applyDiscount"});
+    dispatchModalState({ type: "openModal", payload: "applyDiscount" });
   }
-
   function handleOpenSeeHistory() {
-    dispatchModalState({ type: "openModal", payload: "seeHistory"});
+    dispatchModalState({ type: "openModal", payload: "seeHistory" });
   }
-
+  function handleCloseModal() {
+    dispatchModalState({ type: "closeModal" });
+  }
   function handleConfirmModal() {
     if (modalState.type === "newSell") {
       dispatchCartItems({ type: "cartCleared" });
     }
-    // Aqui você pode adicionar lógica para "FINALIZE_SELL" se precisar
-    
-    dispatchModalState({ type: "closeModal" });
-  }
-
-  function handleCloseModal() {
-    dispatchModalState({ type: "closeModal" });
+    if (modalState.type === "endSell") {
+      dispatchCartItems({ type: "cartCleared" });
+    }
+    if (modalState.type === "applyDiscount") {
+    }
+    if (modalState.type === "seeHistory") {
+      dispatchHistoryState({ type: "openHistory" });
+    }
+    handleCloseModal();
   }
 
   function retryProducts() {
@@ -83,7 +90,8 @@ function App() {
   const subtotal = cartItems.every((item) => item.unitPrice !== null)
     ? cartItems.reduce(
         (totalInCents, item) =>
-          totalInCents + Math.round((item.unitPrice ?? 0) * 100) * item.quantity, 
+          totalInCents +
+          Math.round((item.unitPrice ?? 0) * 100) * item.quantity,
         0,
       ) / 100
     : null;
@@ -93,7 +101,7 @@ function App() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-950 text-white">
       <Header apiStatus={apiStatus} />
-  
+
       <main className="grid flex-1 grid-cols-1 gap-3 lg:grid-cols-4">
         <Carrinho
           apiStatus={apiStatus}
@@ -113,20 +121,25 @@ function App() {
         />
         <Extrato itemCount={itemCount} subtotal={subtotal} />
       </main>
-  
-      <Footer 
-        handleNewSell={handleOpenNewSell} 
+
+      <Footer
+        handleNewSell={handleOpenNewSell}
         handleEndSell={handleOpenEndSell}
         handleApplyDiscount={handleOpenApplyDiscount}
         handleHistory={handleOpenSeeHistory}
       />
 
-      <Modal 
+      <Modal
         isOpen={modalState.isOpen}
         type={modalState.type}
         onClose={handleCloseModal}
         onConfirm={handleConfirmModal}
-      />   
+      />
+
+      <History
+        isOpen={historyState}
+        onClose={() => dispatchHistoryState({ type: "closeHistory" })}
+      />
     </div>
   );
 }
